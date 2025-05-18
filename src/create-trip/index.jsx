@@ -12,13 +12,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/service/firebaseconfig";
-import { getAuth, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
 import { useNavigate, } from "react-router-dom";
 
 
@@ -133,29 +132,17 @@ const SaveAiTrip = async (tripData) => {
 };
 
   const GetUserProfile = (tokenInfo) => {
-  axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`, {
+   axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`, {
     headers: {
       Authorization: `Bearer ${tokenInfo?.access_token}`,
       Accept: "application/json"
     }
-  }).then(async (resp) => {
+  }).then( (resp) => {
     console.log(resp);
     localStorage.setItem("user", JSON.stringify(resp.data));
     setOpenDailog(false);
-
-    // ✅ Firebase Auth Sign In
-    const auth = getAuth();
-    const credential = GoogleAuthProvider.credential(null, tokenInfo.access_token);
-    
-    try {
-      const result = await signInWithCredential(auth, credential);
-      console.log("✅ Signed into Firebase Auth:", result.user);
-      generateTrip(); // Now safe to call
-    } catch (authError) {
-      console.error("❌ Firebase Auth Sign-In Failed:", authError);
-      toast("Firebase Auth sign-in failed. Try again.");
-    }
-  });
+    generateTrip();
+  })
 };
 
  

@@ -23,8 +23,10 @@ function PlacesToVisit({ trip }) {
           
           <div className="grid md:grid-cols-3 gap-4 mt-4 ">
             {dayPlan.places.map((place, index) => (
-                <Link to={'https://www.google.com/maps/search/?api=1&query='+place.name}  target='_blank'>
-                    <div key={index} className="p-4 border rounded-xl shadow-md bg-white hover:scale-105 cursor-pointer transition-all hover:shadow-md">
+                <Link 
+                key={index}
+                to={'https://www.google.com/maps/search/?api=1&query='+place.name}  target='_blank'>
+                    <div  className="p-4 border rounded-xl shadow-md bg-white hover:scale-105 cursor-pointer transition-all hover:shadow-md">
                         <p className="text-sm mt-1">⏰ {place.time}</p>
                         <img
                         src={'/placestovisit.jpg'}
