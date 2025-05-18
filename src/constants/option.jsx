@@ -51,4 +51,49 @@ export const SelectTravelerslList = [
   ];
   
 
-  export const AI_PROMPT = 'Generate travel plan for Location: {location}, for {days} days for {traveler} with a {budget} Budget, Give me a Hotels options list with Hotel Name, Hotel address, price,hotel image url, geo coordinates, rating, descriptions and suggest itinerary with place Name, place details, Place image Url , Geo Coordinates, ticket pricing , Time travel each of the location for {days} days with each day plan with best time to visit in Json format'
+  export const AI_PROMPT = `
+  Generate a travel plan for the following:
+  - Location: {location}
+  - Duration: {days} days
+  - Traveler type: {traveler}
+  - Budget: {budget}
+
+  Return only valid JSON in this structure:
+
+  {
+    "hotels": [
+      {
+        "name": "Hotel Name",
+        "address": "Full address",
+        "price": "Price per night",
+        "imageUrl": "https://...",
+        "geo": { "lat": 0.0, "lng": 0.0 },
+        "rating": 4.5,
+        "description": "Short description"
+      }
+      // multiple hotels like above
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "bestTimeToVisit": "Morning",
+        "places": [
+          {
+            "name": "Place name",
+            "details": "About the place",
+            "imageUrl": "https://...",
+            "geo": { "lat": 0.0, "lng": 0.0 },
+            "ticketPrice": "100 INR",
+            "travelTime": "30 mins",
+            "time": "10:00 AM",
+          }
+          // multiple places like above
+        ]
+      }
+      // more days if applicable
+    ]
+  }
+
+  Only return valid JSON. No explanations, no comments, no Markdown.
+  `;
+

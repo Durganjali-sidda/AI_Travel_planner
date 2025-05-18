@@ -16,14 +16,21 @@ import {
 import { FcGoogle } from "react-icons/fc";
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/service/firebaseconfig";
+import { getAuth, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
+import { useNavigate, } from "react-router-dom";
+
 
 
 
 function CreateTrip() {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
-  const [itinerary, setItinerary] = useState("");
+  // const [itinerary, setItinerary] = useState("");
   const[openDailog, setOpenDailog] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleInputChange = (name, value) => {
   
@@ -46,54 +53,111 @@ const login = useGoogleLogin({
 });
 
   const generateTrip = async () => {
-    const user = localStorage.getItem('user');
-    if(!user){
-      setOpenDailog(true)
-      return ;
-    }
+  setLoading(true);
 
-    const { location, days, budget, traveler } = formData;
+  const user = localStorage.getItem('user');
+  if (!user) {
+    setOpenDailog(true);
+    setLoading(false);
+    return;
+  }
 
-    if (!location || !days || !budget || !traveler) {
-      toast("Please fill all details");
-      return;
-    }
-    const Final_prompt = AI_PROMPT
-    .replace('{location}',formData?.location?.label)
-    .replace('{days}',formData?.days)
-    .replace('{traveler}',formData?.traveler)
-    .replace('{budget',formData?.budget)
-    .replace('{days}',formData?.days)
-    console.log(Final_prompt)
-    
+  const { location, days, budget, traveler } = formData;
 
-    setLoading(true);
-    setItinerary("");
+  if (!location || !days || !budget || !traveler) {
+    toast("Please fill all details");
+    setLoading(false);
+    return;
+  }
 
+  if (parseInt(days) > 5) {
+    toast("Trip duration should not be more than 5 days");
+    setLoading(false);
+    return;
+  }
+
+  const Final_prompt = AI_PROMPT
+    .replace('{location}', location?.label)
+    .replaceAll('{days}', days)
+    .replace('{traveler}', traveler)
+    .replace('{budget}', budget);
+
+  console.log("Prompt Sent to Gemini:", Final_prompt);
+
+  // setItinerary("");
+
+  try {
     const response = await generateTravelPlan(Final_prompt);
 
-    if (response) {
-      setItinerary(response);
+    if (response && typeof response === "object") {
+      // setItinerary(JSON.stringify(response, null, 2));
+      toast("Itinerary generated successfully!");
+      await SaveAiTrip(response);
     } else {
-      toast("Failed to generate itinerary from Gemini");
+      toast("Gemini did not return valid JSON. Try again.");
     }
 
-    setLoading(false);
-  };
- 
-  const GetUserProfile=(tokenInfo)=>{
-    axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`,{
-      headers:{
-        Authorization:`Bearer ${tokenInfo?.access_token}`,
-        Accept:'Application/json'
-      }
-    }).then((resp)=>{
-      console.log(resp)
-      localStorage.setItem('user',JSON.stringify(resp.data));
-      setOpenDailog(false);
-      generateTrip()
-    })
+  } catch (error) {
+    console.error("generateTrip error:", error);
+    toast("Failed to generate trip. Please try again.");
   }
+
+  setLoading(false);
+};
+
+
+const SaveAiTrip = async (tripData) => {
+  setLoading(true);
+  const docId = Date.now().toString();
+
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+
+    await setDoc(doc(db, "AITrips", docId), {
+      userSelection: formData,
+      tripData,
+      userEmail: user?.email || "unknown",
+      id: docId,
+    });
+
+    console.log("✅ Saved AI Trip:", docId);
+  } catch (error) {
+    console.error("❌ Failed to save AI Trip:", error);
+    toast("Failed to save trip. Try again.");
+  }
+
+  setLoading(false);
+  navigate('/view-trip/'+ docId)
+
+};
+
+  const GetUserProfile = (tokenInfo) => {
+  axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`, {
+    headers: {
+      Authorization: `Bearer ${tokenInfo?.access_token}`,
+      Accept: "application/json"
+    }
+  }).then(async (resp) => {
+    console.log(resp);
+    localStorage.setItem("user", JSON.stringify(resp.data));
+    setOpenDailog(false);
+
+    // ✅ Firebase Auth Sign In
+    const auth = getAuth();
+    const credential = GoogleAuthProvider.credential(null, tokenInfo.access_token);
+    
+    try {
+      const result = await signInWithCredential(auth, credential);
+      console.log("✅ Signed into Firebase Auth:", result.user);
+      generateTrip(); // Now safe to call
+    } catch (authError) {
+      console.error("❌ Firebase Auth Sign-In Failed:", authError);
+      toast("Firebase Auth sign-in failed. Try again.");
+    }
+  });
+};
+
  
   return (
     <div className="sm:px-10 md:px-32 lg:px-56 xl:px-72 px-5 mt-10">
@@ -178,13 +242,13 @@ const login = useGoogleLogin({
       {loading && (
         <div className="text-gray-500">Generating your itinerary...</div>
       )}
-
+{/* 
       {!loading && itinerary && (
         <div className="mt-10 bg-gray-100 p-5 rounded-xl whitespace-pre-wrap">
           <h3 className="text-xl font-bold mb-3">Your Trip Plan:</h3>
           <p>{itinerary}</p>
         </div>
-      )}
+      )} */}
 
       <Dialog open={openDailog} onOpenChange={setOpenDailog}>
        
@@ -194,14 +258,14 @@ const login = useGoogleLogin({
              className="w-16 h-16 mx-auto" />
             <DialogTitle className="font-bold text-lg mt-7">Sign In with Google</DialogTitle>
             <DialogDescription>
-              Sign in to the App with Google authentication securely
+              Sign in to the App with Google authentication securely.
             </DialogDescription>
           </DialogHeader>
 
           <Button
             onClick={login}
             className="w-full mt-5 bg-black text-white flex gap-4 items-center"
-          >
+          > 
             <FcGoogle className="h-7 w-7" />
             Sign In With Google
           </Button>
