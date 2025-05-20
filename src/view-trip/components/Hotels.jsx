@@ -28,12 +28,12 @@ function Hotel({ trip }) {
   return (
     <div>
       <h2 className="font-bold text-xl mt-5">Hotel Recommendation</h2>
-      <div className="grid gap-4 mt-4 md:grid-cols-3 ">
+      <div className="grid gap-3 mt-4 md:grid-cols-4 ">
         {hotels.map((item, index) => (
           <Link 
           key={index}
           to={'https://www.google.com/maps/search/?api=1&query='+item.name+ " ,"+item.address}  target='_blank'>
-          <div  className=" hover:scale-105 cursor-pointer transition-all p-4 border rounded-xl shadow-md bg-white">
+          <div  className=" hover:scale-105 cursor-pointer transition-all  rounded-xl shadow-md bg-white h-full flex flex-col">
             <img
               src={ '/Hotels.jpg'}
               alt={item.name || `Hotel ${index + 1}`}

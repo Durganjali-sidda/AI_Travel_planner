@@ -23,8 +23,8 @@ function Header() {
   const[openDailog, setOpenDailog] = useState(false);
 
   useEffect(()=>{
-    console.log(user)
-  }, []);
+    console.debug("User info:", user);
+  }, [user]);
 
   const login = useGoogleLogin({
   onSuccess: (codeResp) => {
@@ -53,18 +53,23 @@ const GetUserProfile = (tokenInfo) => {
       <div>
         {user ?
            <div className='flex items-center gap-3'>
+            <a href='/create-trip'>
+              <Button variant='outline' className='rounded-full'>+ Create Trip</Button>
+            </a>
+            <a href='/my-trips'>
               <Button variant='outline' className='rounded-full'>My Trips</Button>
-
+            </a>
              
               <Popover>
                 <PopoverTrigger>
                    <img src={user?.picture} className='h-[35px] w-[35px] rounded-full'/>
                 </PopoverTrigger>
-                <PopoverContent>
-                  <h2  className=' cursor-pointer 'onClick={()=>{
+                <PopoverContent className="w-28 mt-2 p-2 bg-white border rounded-md shadow-lg text-center"
+                sideOffset={8} >
+                  <h2  className=' cursor-pointer text-red-600 text-sm font-medium hover:text-red-700 transition'onClick={()=>{
                     googleLogout();
                     localStorage.clear();
-                    window.location.reload();
+                    window.location.href = '/';
                   }}>Logout</h2>
                 </PopoverContent>
               </Popover>

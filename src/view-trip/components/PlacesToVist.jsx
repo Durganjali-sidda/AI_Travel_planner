@@ -26,7 +26,7 @@ function PlacesToVisit({ trip }) {
                 <Link 
                 key={index}
                 to={'https://www.google.com/maps/search/?api=1&query='+place.name}  target='_blank'>
-                    <div  className="p-4 border rounded-xl shadow-md bg-white hover:scale-105 cursor-pointer transition-all hover:shadow-md">
+                    <div  className="p-3 rounded-xl shadow-md bg-white hover:scale-105 cursor-pointer transition-all hover:shadow-md h-full flex flex-col">
                         <p className="text-sm mt-1">⏰ {place.time}</p>
                         <img
                         src={'/placestovisit.jpg'}

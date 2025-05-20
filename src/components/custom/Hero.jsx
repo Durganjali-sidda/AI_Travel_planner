@@ -13,6 +13,9 @@ function Hero() {
         <Link to={'/create-trip'}>
         <Button className="bg-black text-white">Get started</Button>
         </Link>
+
+        <img src="/design.png" alt="Hero" className="w-full max-w-4xl px-10 ml-14 " />
+        
     </div>
   )
 }

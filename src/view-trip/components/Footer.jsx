@@ -2,7 +2,7 @@ import React from 'react';
 
 function Footer() {
   return (
-    <footer className="bg-gray-100 w-full mt-10 py-6 px-4 md:px-12 text-gray-700">
+    <footer className="mt-auto  bg-gray-100 py-6 px-4 md:px-12 text-gray-700 shadow-inner">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
         
         {/* Branding */}
